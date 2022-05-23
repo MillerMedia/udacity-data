@@ -9,7 +9,7 @@ Below is the schema of the data that I have designed to ingest and analyze this 
 
 ### How To Run
 In order to run this program, follow the steps below:  
-• Create an AWS Redshift cluster in region us-west-2  
+• Create an AWS Redshift cluster in region us-west-2. Make sure the cluster has the 'Publicy Accessible' option updated to 'enabled'.  
 • Once created, fill in the corresponding fields in the dwh.cfg (under the [CLUSTER] heading) file with the clusters information  
 • Create an IAM role in AWS. This role will need policies for S3ReadOnlyAccess and Admin RedShift access.  
 • Add the ARN of the recently created role and add it under the [IAM_ROLE] heading in dwh.cfg  
