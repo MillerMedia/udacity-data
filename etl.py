@@ -1,9 +1,17 @@
+"""
+This contains functions that process data stored in S3.
+
+Initially, this runs queries that load S3 data into Redshift staging tables.
+Then it migrates the data from staging tables into other tables for analytics.
+"""
+
 import configparser
 import psycopg2
 from sql_queries import copy_table_queries, insert_table_queries
 
 
 def load_staging_tables(cur, conn):
+    """Load data from S3 into staging tables."""
     for query in copy_table_queries:
         print(query)
         cur.execute(query)
@@ -11,6 +19,7 @@ def load_staging_tables(cur, conn):
 
 
 def insert_tables(cur, conn):
+    """Migrate data from staging tables to permanent tables."""
     for query in insert_table_queries:
         print(query)
         cur.execute(query)
@@ -18,12 +27,17 @@ def insert_tables(cur, conn):
 
 
 def main():
+    """Run loading of data from S3 & migration of data to permanent tables."""
     config = configparser.ConfigParser()
     config.read('dwh.cfg')
 
-    conn = psycopg2.connect("host={} dbname={} user={} password={} port={}".format(*config['CLUSTER'].values()))
+    conn = psycopg2.connect(
+        "host={} dbname={} user={} password={} port={}".format(
+            *config['CLUSTER'].values()
+        )
+    )
     cur = conn.cursor()
-    
+
     load_staging_tables(cur, conn)
     insert_tables(cur, conn)
 

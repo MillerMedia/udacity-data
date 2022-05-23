@@ -1,5 +1,10 @@
-import configparser
+"""
+This file contains the queries to process project data.
 
+This includes drop, create, copy and insert queries.
+"""
+
+import configparser
 
 # CONFIG
 config = configparser.ConfigParser()
@@ -17,8 +22,8 @@ time_table_drop = "DROP TABLE IF EXISTS time;"
 
 # CREATE TABLES
 
-staging_events_table_create= ("""CREATE TABLE IF NOT EXISTS staging_events
-    (    
+staging_events_table_create = ("""CREATE TABLE IF NOT EXISTS staging_events
+    (
         artist varchar,
         auth varchar,
         firstName varchar,
@@ -113,13 +118,13 @@ time_table_create = ("""CREATE TABLE IF NOT EXISTS time
 """)
 
 # STAGING TABLES
-# Opted for using IAM_ROLE variable instead of credentials based on this SO answer:
+# Opted for using IAM_ROLE variable based on this SO answer:
 # https://stackoverflow.com/a/61945267/975592
 staging_events_copy = ("""
     copy staging_events(
-    artist, 
-    auth, 
-    firstName, 
+    artist,
+    auth,
+    firstName,
     gender,
     itemInSession,
     lastName,
@@ -127,19 +132,23 @@ staging_events_copy = ("""
     level,
     location,
     method,
-    page, 
+    page,
     registration,
     sessionId,
     song,
     status,
-    ts, 
-    userAgent, 
+    ts,
+    userAgent,
     user_id
 )
 from {}
     format JSON as {}
     IAM_ROLE '{}'
-""").format(config['S3']['LOG_DATA'], config['S3']['LOG_JSONPATH'], config['IAM_ROLE']['ARN'])
+""").format(
+    config['S3']['LOG_DATA'],
+    config['S3']['LOG_JSONPATH'],
+    config['IAM_ROLE']['ARN']
+)
 
 staging_songs_copy = ("""
     copy staging_songs (
@@ -215,7 +224,11 @@ artist_table_insert = ("""INSERT INTO artists
         location,
         latitude,
         longitude
-    ) SELECT distinct artist_id, artist_name, artist_location, artist_latitude, artist_longitude
+    ) SELECT distinct artist_id,
+    artist_name,
+    artist_location,
+    artist_latitude,
+    artist_longitude
     FROM staging_songs
 """)
 
@@ -228,7 +241,9 @@ time_table_insert = ("""INSERT INTO time
         month,
         year,
         weekday
-    ) SELECT distinct(TIMESTAMP 'epoch' + ts * INTERVAL '1 second') AS start_time,
+    ) SELECT distinct(
+        TIMESTAMP 'epoch' + ts * INTERVAL '1 second'
+    ) AS start_time,
     extract(hour from start_time),
     extract(day from start_time),
     extract(week from start_time),
@@ -240,7 +255,35 @@ time_table_insert = ("""INSERT INTO time
 
 # QUERY LISTS
 
-create_table_queries = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
-drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
-copy_table_queries = [staging_events_copy, staging_songs_copy]
-insert_table_queries = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
+create_table_queries = [
+    staging_events_table_create,
+    staging_songs_table_create,
+    songplay_table_create,
+    user_table_create,
+    song_table_create,
+    artist_table_create,
+    time_table_create
+]
+
+drop_table_queries = [
+    staging_events_table_drop,
+    staging_songs_table_drop,
+    songplay_table_drop,
+    user_table_drop,
+    song_table_drop,
+    artist_table_drop,
+    time_table_drop
+]
+
+copy_table_queries = [
+    staging_events_copy,
+    staging_songs_copy
+]
+
+insert_table_queries = [
+    songplay_table_insert,
+    user_table_insert,
+    song_table_insert,
+    artist_table_insert,
+    time_table_insert
+]
